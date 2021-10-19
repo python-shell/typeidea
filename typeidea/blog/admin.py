@@ -5,6 +5,8 @@ from django.urls import reverse
 from .adminforms import PostAdminForm
 from custom_site import custom_site
 from django.contrib.auth.models import User
+from django.contrib.auth import get_permission_codename
+from base_admin import BaseOwnerAdmin
 # Register your models here.
 
 
@@ -15,24 +17,16 @@ class PostInline(admin.TabularInline):
 
 
 @admin.register(Category, site=custom_site)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(BaseOwnerAdmin):
     inlines = (PostInline, )
     list_display = ('name', 'status', 'is_nav', 'owner', 'created_time')
     fields = ('name', 'status', 'is_nav', 'owner')
 
-    # def save_model(self, request, obj, form, change):
-    #     obj.owner = request.user
-    #     return super().save_model(request, obj, form, change)
-
 
 @admin.register(Tag, site=custom_site)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(BaseOwnerAdmin):
     list_display = ('name', 'status', 'created_time')
     fields = ('name', 'status')
-
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super(TagAdmin, self).save_model(request, obj, form, change)
 
 
 class CategoryOwnerFilter(admin.SimpleListFilter):
@@ -54,7 +48,7 @@ class CategoryOwnerFilter(admin.SimpleListFilter):
 
 
 @admin.register(Post, site=custom_site)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(BaseOwnerAdmin):
     form = PostAdminForm
     list_display = ['title', 'category', 'status',
                     'created_time', 'owner', 'operator']
@@ -104,16 +98,17 @@ class PostAdmin(admin.ModelAdmin):
                            reverse('cus_admin:blog_post_change', args=(obj.id, )))
     operator.short_description = '操作'
 
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super().save_model(request, obj, form, change)
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.filter(owner=request.user)
-
     # class Media:
     #     css = {
     #         'all': ("https://cdn.bootcss.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css", ),
     #     }
     #     js = ('https://cdn.bootcss.com/bootstrap/4.0.0-beta.2/js/bootstrap.bundle.js', )
+    def has_add_permission(self, request):
+        print("in has add permission")
+        print("self.opts:", self.opts)  # blog.post
+        opts = self.opts
+        codename = get_permission_codename('add', opts)
+        print(opts.app_label, codename)
+        return request.user.has_perm("%s.%s" % (opts.app_label, codename))
+
+

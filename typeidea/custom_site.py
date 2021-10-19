@@ -15,6 +15,7 @@ class CustomSite(AdminSite):
 
     # Text to put at the top of the admin index page.
     index_title = '首页'
+    site_url = '/aaa'
 
 
 custom_site = CustomSite(name='cus_admin')
