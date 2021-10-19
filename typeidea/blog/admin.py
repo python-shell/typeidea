@@ -7,7 +7,23 @@ from custom_site import custom_site
 from django.contrib.auth.models import User
 from django.contrib.auth import get_permission_codename
 from base_admin import BaseOwnerAdmin
+from django.core.exceptions import FieldError
+#日志记录模块
+from django.contrib.admin.models import LogEntry
 # Register your models here.
+
+
+@admin.register(LogEntry, site=custom_site)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ['user', 'object_repr', 'object_id', 'action_flag', 'action_time', 'change_message']
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        try:
+            res = qs.filter(owner=request.user)
+        except FieldError:
+            res = qs.filter(user=request.user)
+        return res
 
 
 class PostInline(admin.TabularInline):
