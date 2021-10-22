@@ -16,14 +16,15 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from custom_site import custom_site
-from blog.views import post_list, post_detail
+# from blog.views import post_list, post_detail
+from blog.views import IndexView, CategoryView, TagView, PostDetailView
 from config.views import links
 
 urlpatterns = [
-    url(r'^$', post_list, name='post_list'),
-    url(r'^category/(?P<category_id>\d+)/$', post_list, name='category_list'),
-    url(r'^tag/(?P<tag_id>\d+)/$', post_list, name='tag_list'),
-    url(r'^post/(?P<post_id>\d+).html$', post_detail, name='post_detail'),
+    url(r'^$', IndexView.as_view(), name='post_list'),
+    url(r'^category/(?P<category_id>\d+)/$', CategoryView.as_view(), name='category_list'),
+    url(r'^tag/(?P<tag_id>\d+)/$', TagView.as_view(), name='tag_list'),
+    url(r'^post/(?P<post_id>\d+).html$', PostDetailView.as_view(), name='post_detail'),
     url(r'^links/$', links, name='links'),
 
     url(r'^super_admin/', admin.site.urls),

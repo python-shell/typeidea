@@ -10,6 +10,7 @@ from base_admin import BaseOwnerAdmin
 from django.core.exceptions import FieldError
 #日志记录模块
 from django.contrib.admin.models import LogEntry
+from django.contrib.auth.backends import ModelBackend
 # Register your models here.
 
 
@@ -120,11 +121,11 @@ class PostAdmin(BaseOwnerAdmin):
     #     }
     #     js = ('https://cdn.bootcss.com/bootstrap/4.0.0-beta.2/js/bootstrap.bundle.js', )
     def has_add_permission(self, request):
-        print("in has add permission")
-        print("self.opts:", self.opts)  # blog.post
+        # print("in has add permission")
+        # print("self.opts:", self.opts)  # blog.post
         opts = self.opts
         codename = get_permission_codename('add', opts)
-        print(opts.app_label, codename)
+        # print(opts.app_label, codename)
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
 
 
