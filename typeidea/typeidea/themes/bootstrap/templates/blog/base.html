@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- 新 Bootstrap4 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- 用于弹窗、提示、下拉菜单，包含了 popper.min.js -->
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+
+    <!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <title>{% block title %}首页{% endblock %}-typeidea博客系统</title>
+</head>
+<body>
+<div class="container header">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">首页</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+
+
+                {% for cate in nav %}
+                <li class="nav-item">
+                    <!--<a href="/category/{{ cate.id }}">{{ cate.name }}</a>-->
+                    <a class="nav-link" href="{% url 'category_list' cate.id %}">{{ cate.name }}</a>
+                </li>
+                {% endfor %}
+
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
+            </form>
+        </div>
+    </nav>
+    <div class="jumbotron">
+        <h1 class="display-4">Typeidea</h1>
+        <p class="lead">基于Django的多人博客系统</p>
+    </div>
+</div>
+<div class="container main">
+    <div class="row">
+        <div class="col-9">
+            {% block main %}
+            {% endblock %}
+        </div>
+        <div class="col-3">
+        {% block side %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">侧边栏</h5>
+                {% for side in sidebars %}
+                <h4>{{ side.title }}</h4>
+                <span>{{ side.content_html }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+    </div>
+
+</div>
+<footer class="footer">
+    <div class="container">
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav">
+                    {% for cate in categories %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'category_list' cate.id %}">{{ cate.name }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <div class="container power">
+        <hr>
+        <span>Power by tianming</span>
+    </div>
+</footer>
+</body>
+</html>
