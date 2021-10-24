@@ -3,6 +3,7 @@ from .models import Post, Tag, Category
 from config.models import SideBar
 from django.views.generic import ListView, DetailView, TemplateView
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 
 # Create your views here.
@@ -22,7 +23,30 @@ class IndexView(CommonViewMixin, ListView):
     template_name = 'blog/list.html'
     context_object_name = 'post_list'
     paginate_by = 5
-    print("in IndexView")
+    # print("in IndexView")
+
+
+class AuthorView(IndexView):
+    def get_queryset(self):
+        queryset = super(AuthorView, self).get_queryset()
+        author_id = self.kwargs.get("author_id")
+        return queryset.filter(owner_id=author_id)
+
+
+class SearchView(IndexView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'keyword': self.request.GET.get('keyword', '')
+        })
+        return context
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        keyword = self.request.GET.get('keyword')
+        if not keyword:
+            return qs
+        return qs.filter(Q(title__icontains=keyword) | Q(desc__icontains=keyword))
 
 
 class CategoryView(IndexView):
