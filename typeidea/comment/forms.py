@@ -5,6 +5,7 @@
 # @FileName: forms.py
 from django import forms
 from .models import Comment
+import mistune
 
 
 class CommentForm(forms.ModelForm):
@@ -21,10 +22,13 @@ class CommentForm(forms.ModelForm):
         attrs={'class': 'form-control', 'style': 'width: 60%'}
     ))
 
-    def clear_content(self):
+    def clean_content(self):
         content = self.cleaned_data.get('content')
         if len(content) < 10:
             raise forms.ValidationError("内容长度太短！！")
+        # 增加markdown处理
+        content = mistune.markdown(content)
+        # print(content)
         return content
 
     class Meta:

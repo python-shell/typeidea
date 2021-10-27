@@ -1,6 +1,13 @@
 {% extends './base.html' %}
-
+{% load static %}
+{% load comment_block %}
 {% block title %}{{ post.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'highlight/css/default.min.css' %}">
+<script src="{% static 'highlight/js/highlight.min.js' %}"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+{% endblock %}
 
 {% block main %}
 {% if post %}
@@ -15,30 +22,12 @@
 </div>
 <hr>
 <p>
-    {{ post.content }}
+    <!--解除django的自动转码-->
+    {% autoescape off %}
+    {{ post.content_html }}
+    {% endautoescape %}
 </p>
 {% endif %}
-<hr>
-<div class="comment">
-    <form class="form-group" action="/comment/" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="target" value="{{ request.path }}">
-        {{ comment_form }}
-        <input type="submit" class="btn btn-primary" value="评论写好了！"/>
-    </form>
-    <!--评论列表-->
-    <ul class="list-group">
-        {% for comment in comment_list %}
-        <li class="list-group-item">
-            <div class="nickname">
-                <a href="{{ comment.website }}">{{ comment.nickname }}</a>
-                <span>{{ comment.created_time }}</span>
-            </div>
-            <div class="content">
-                {{ comment.content }}
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+
+{% comment_block request.path %}
 {% endblock %}

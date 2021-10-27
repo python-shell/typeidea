@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView, TemplateView
 from comment.models import Comment
 from comment.forms import CommentForm
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, F
 
 
 # Create your views here.
@@ -89,15 +89,40 @@ class PostDetailView(CommonViewMixin, DetailView):
     context_object_name = 'post'
     pk_url_kwarg = 'post_id'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        context.update({
-            'comment_form': CommentForm,
-            'comment_list': Comment.get_by_target(self.request.path)
-        })
-        print("self.reqeust.path:", self.request.path)
-        print("context:", context.get('request'))
-        return context
+    def get(self, request, *args, **kwargs):
+        response = super(PostDetailView, self).get(request, *args, **kwargs)
+        self.handle_visited()
+        return response
+
+    def handle_visited(self):
+        pv_increase = False
+        uv_increase = False
+        import datetime
+        from django.core.cache import cache
+        pv_key = 'pv:%s:%s'.format(self.request.uid, self.request.path)
+        uv_key = 'uv:%s:%s:%s'.format(self.request.uid, str(datetime.date.today()), self.request.path)
+        if not cache.get(pv_key):
+            pv_increase = True
+            cache.set(pv_key, 1, 1*60)
+        if not cache.get(uv_key):
+            uv_increase = True
+            cache.set(uv_key, 1, 60*60*24)
+        if pv_increase and uv_increase:
+            Post.objects.filter(pk=self.object.id).update(pv=F('pv')+1, uv=F('uv')+1)
+        elif pv_increase:
+            Post.objects.filter(pk=self.object.id).update(pv=F('pv')+1)
+        elif uv_increase:
+            Post.objects.filter(pk=self.object.id).update(uv=F('uv')+1)
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data()
+    #     context.update({
+    #         'comment_form': CommentForm(),
+    #         'comment_list': Comment.get_by_target(self.request.path)
+    #     })
+    #     # print("self.reqeust.path:", self.request.path)
+    #     # print("context:", context.get('request'))
+    #     return context
 #
 # def post_list(request, category_id=None, tag_id=None):
 #     tag = None
@@ -121,16 +146,16 @@ class PostDetailView(CommonViewMixin, DetailView):
 #     return render(request, 'blog/list.html', context=context)
 #
 #
-# def post_detail(request, post_id):
-#     try:
-#         post = Post.objects.get(id=post_id)
-#     except Post.DoesNotExist:
-#         post = None
-#
-#     context = {
-#         'post': post,
-#         'sidebars': SideBar.get_all()
-#     }
-#     context.update(Category.get_navs())
-#     return render(request, 'blog/detail.html', context=context)
+def post_detail(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        post = None
+
+    context = {
+        'post': post,
+        'sidebars': SideBar.get_all()
+    }
+    context.update(Category.get_navs())
+    return render(request, 'blog/detail.html', context=context)
 

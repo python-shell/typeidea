@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+import mistune
+
 
 # Create your models here.
 class Category(models.Model):
@@ -40,8 +42,6 @@ class Category(models.Model):
         }
 
 
-
-
 class Tag(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
@@ -73,6 +73,7 @@ class Post(models.Model):
     title = models.CharField(max_length=128, verbose_name="标题")
     desc = models.CharField(max_length=1024, blank=True, verbose_name="摘要")
     content = models.TextField(verbose_name="正文", help_text="正文必须为mark down格式")
+    content_html = models.TextField(verbose_name="正文html代码", blank=True, editable=False)
     status = models.PositiveIntegerField(default=STATUS_NORMAL, choices=STATUS_ITEMS, verbose_name="状态")
     category = models.ForeignKey(Category, verbose_name="分类")
     tag = models.ManyToManyField(Tag, verbose_name="标签")
@@ -118,3 +119,7 @@ class Post(models.Model):
     @classmethod
     def hot_posts(cls):
         return cls.objects.filter(status=cls.STATUS_NORMAL).order_by('-pv')
+
+    def save(self, *args, **kwargs):
+        self.content_html = mistune.markdown(self.content)
+        super().save(*args, **kwargs)

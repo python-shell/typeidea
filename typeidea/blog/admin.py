@@ -68,7 +68,7 @@ class CategoryOwnerFilter(admin.SimpleListFilter):
 class PostAdmin(BaseOwnerAdmin):
     form = PostAdminForm
     list_display = ['title', 'category', 'status',
-                    'created_time', 'owner', 'operator']
+                    'created_time', 'owner', 'operator', 'content_html']
     list_display_links = []
     list_filter = [CategoryOwnerFilter]
     search_fields = ['title', 'category__name']
@@ -89,7 +89,7 @@ class PostAdmin(BaseOwnerAdmin):
         ('内容', {
             'fields': (
                 'desc',
-                'content'
+                'content',
             )
         }),
         ('额外配置', {
