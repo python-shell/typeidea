@@ -1,3 +1,5 @@
+from django.utils.functional import cached_property
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -15,7 +17,7 @@ class Category(models.Model):
     name = models.CharField(max_length=128, verbose_name="名称")
     status = models.PositiveIntegerField(default=STATUS_NORMAL, choices=STATUS_ITEMS, verbose_name="状态")
     is_nav = models.BooleanField(default=False, verbose_name="是否为导航")
-    owner = models.ForeignKey(User, verbose_name="作者")
+    owner = models.ForeignKey(User, verbose_name="作者", on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
     class Meta:
@@ -51,7 +53,7 @@ class Tag(models.Model):
     ]
     name = models.CharField(max_length=128, verbose_name="名称")
     status = models.PositiveIntegerField(default=STATUS_NORMAL, choices=STATUS_ITEMS, verbose_name="状态")
-    owner = models.ForeignKey(User, verbose_name="作者")
+    owner = models.ForeignKey(User, verbose_name="作者", on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
     class Meta:
@@ -72,12 +74,13 @@ class Post(models.Model):
     ]
     title = models.CharField(max_length=128, verbose_name="标题")
     desc = models.CharField(max_length=1024, blank=True, verbose_name="摘要")
+    is_md = models.BooleanField(default=False, verbose_name="markdown默认语法")
     content = models.TextField(verbose_name="正文", help_text="正文必须为mark down格式")
     content_html = models.TextField(verbose_name="正文html代码", blank=True, editable=False)
     status = models.PositiveIntegerField(default=STATUS_NORMAL, choices=STATUS_ITEMS, verbose_name="状态")
-    category = models.ForeignKey(Category, verbose_name="分类")
+    category = models.ForeignKey(Category, verbose_name="分类", on_delete=models.CASCADE)
     tag = models.ManyToManyField(Tag, verbose_name="标签")
-    owner = models.ForeignKey(User, verbose_name="作者")
+    owner = models.ForeignKey(User, verbose_name="作者", on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     pv = models.PositiveIntegerField(default=1)
     uv = models.PositiveIntegerField(default=1)
@@ -121,5 +124,19 @@ class Post(models.Model):
         return cls.objects.filter(status=cls.STATUS_NORMAL).order_by('-pv')
 
     def save(self, *args, **kwargs):
-        self.content_html = mistune.markdown(self.content)
+        if self.is_md:
+            self.content_html = mistune.markdown(self.content)
+        else:
+            self.content_html = self.content
         super().save(*args, **kwargs)
+
+    @cached_property
+    def tags(self):
+        print(self.tag)
+        print(type(self.tag))
+        print(self.tag.values_list('name'))
+        print(self.tag.values_list('name', flat=True))
+        print(self.title)
+        print(self.pv)
+        # print(self.objects.values_list('title', flat=True))
+        return ''.join(self.tag.values_list('name', flat=True))

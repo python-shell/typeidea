@@ -12,7 +12,7 @@ from django.core.exceptions import FieldError
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.backends import ModelBackend
 # Register your models here.
-
+from django.http import HttpResponse
 
 @admin.register(LogEntry, site=custom_site)
 class LogEntryAdmin(admin.ModelAdmin):
@@ -88,6 +88,7 @@ class PostAdmin(BaseOwnerAdmin):
         }),
         ('内容', {
             'fields': (
+                'is_md',
                 'desc',
                 'content',
             )

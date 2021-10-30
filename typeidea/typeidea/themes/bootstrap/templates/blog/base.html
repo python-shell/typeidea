@@ -41,7 +41,7 @@
                 {% endfor %}
 
             </ul>
-            <form class="form-inline my-2 my-lg-0" action="/search/" method="GET" >
+            <form class="form-inline my-2 my-lg-0" action="/search/" method="GET">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
                        name="keyword" value="{{ keyword }}">
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
@@ -60,18 +60,17 @@
             {% endblock %}
         </div>
         <div class="col-3">
-        {% block side %}
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">侧边栏</h5>
-                {% for side in sidebars %}
-                <h4>{{ side.title }}</h4>
-                <span>{{ side.content_html }}</span>
-                {% endfor %}
+            {% block side %}
+            {% for side in sidebars %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ side.title }}</h5>
+                    <span>{{ side.content_html }}</span>
+                </div>
             </div>
+            {% endfor %}
+            {% endblock %}
         </div>
-        {% endblock %}
-    </div>
     </div>
 
 </div>
