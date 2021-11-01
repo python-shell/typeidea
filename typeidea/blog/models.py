@@ -3,6 +3,7 @@ from django.utils.functional import cached_property
 from django.contrib.auth.models import User
 from django.db import models
 
+from silk.profiling.profiler import silk_profile
 import mistune
 
 
@@ -27,6 +28,7 @@ class Category(models.Model):
         return self.name
 
     @classmethod
+    @silk_profile(name='get_navs')
     def get_navs(cls):
         categories = cls.objects.filter(status=cls.STATUS_NORMAL)
         nav_categories = []
@@ -115,8 +117,10 @@ class Post(models.Model):
         return post_list, category
 
     @classmethod
-    def latest_posts(cls):
-        queryset = cls.objects.filter(status=cls.STATUS_NORMAL)
+    def latest_posts(cls, with_related=True):
+        queryset = cls.objects.filter(status=cls.STATUS_NORMAL).prefetch_related('tag')
+        if with_related:
+            queryset = queryset.select_related('category', 'owner')
         return queryset
 
     @classmethod

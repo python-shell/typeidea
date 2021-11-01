@@ -56,6 +56,8 @@ class SideBar(models.Model):
 
     @classmethod
     def get_all(cls):
+        # import time
+        # time.sleep(10)
         return cls.objects.filter(status=cls.STATUS_SHOW)
 
     @property
@@ -67,7 +69,7 @@ class SideBar(models.Model):
         if self.display_type == self.DISPLAY_HTML:
             result = self.content
         elif self.display_type == self.DISPLAY_LATEST:
-            posts = Post.latest_posts()
+            posts = Post.latest_posts(with_related=False)
             context = {
                 'posts': posts
             }
