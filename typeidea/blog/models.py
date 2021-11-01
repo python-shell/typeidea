@@ -1,5 +1,7 @@
-from django.utils.functional import cached_property
+from functools import wraps
 
+from django.utils.functional import cached_property
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -65,6 +67,23 @@ class Tag(models.Model):
         return self.name
 
 
+#################################
+# custom decorators start
+#################################
+def cache_it(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = cache.get('host_posts')
+        if not result:
+            result = func(*args, **kwargs)
+            cache.set('host_posts', result, 5*60)
+        return result
+    return wrapper
+#################################
+# custom decorators end
+#################################
+
+
 class Post(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
@@ -124,8 +143,10 @@ class Post(models.Model):
         return queryset
 
     @classmethod
+    @cache_it
     def hot_posts(cls):
-        return cls.objects.filter(status=cls.STATUS_NORMAL).order_by('-pv')
+        result = cls.objects.filter(status=cls.STATUS_NORMAL).order_by('-pv')
+        return result
 
     def save(self, *args, **kwargs):
         if self.is_md:
@@ -144,3 +165,6 @@ class Post(models.Model):
         print(self.pv)
         # print(self.objects.values_list('title', flat=True))
         return ''.join(self.tag.values_list('name', flat=True))
+
+
+

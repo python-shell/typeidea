@@ -1,3 +1,4 @@
+{% load cache %}
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -61,6 +62,7 @@
         </div>
         <div class="col-3">
             {% block side %}
+            {% cache 30 sidebars %}  <!--缓存sidebars30s-->
             {% for side in sidebars %}
             <div class="card">
                 <div class="card-body">
@@ -69,6 +71,7 @@
                 </div>
             </div>
             {% endfor %}
+            {% endcache %}
             {% endblock %}
         </div>
     </div>

@@ -49,8 +49,8 @@ CKEDITOR_UPLOAD_PATH = "article_images"
 # ]
 # ip = '192.168.0.104'
 # INTERNAL_IPS = [ip]
-
-
+#
+#
 # DEBUG_TOOLBAR_PANELS = [
 #     'debug_toolbar.panels.versions.VersionsPanel',
 #     'debug_toolbar.panels.timer.TimerPanel',
@@ -99,3 +99,18 @@ MIDDLEWARE += [
     'silk.middleware.SilkyMiddleware',
 ]
 
+
+REDIS_URL = 'redis://192.168.0.106:6379/1'
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'PASSWORD': 123456,
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PARSE_CLASS': 'redis.connection.HiredisParser'
+        },
+        'CONNECTION_POOL_CLASS': 'redis.connection.BlockConnectionPool',
+    }
+}
